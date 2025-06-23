@@ -153,6 +153,9 @@ class Predictor(BasePredictor):
         background_prompt: str = Input(description="Text prompt for the background generation."),
         num_sampling_steps: int = Input(
             description="Number of inference steps for LBM model.", default=1, ge=1, le=4
+        ),
+        num_flux_steps: int = Input(
+            description="Number of inference steps for FLUX.1-Fill model.", default=25, ge=1, le=25
         )
     ) -> Path:
         """Run relighting prediction with foreground and background images."""
@@ -189,10 +192,10 @@ class Predictor(BasePredictor):
 
                 inpainted_image_flux_sized = self.flux_fill_pipeline(
                     prompt=background_prompt, image=resized_fg_image_for_flux, mask_image=resized_inpaint_mask_for_flux,
-                    height=flux_proc_height, width=flux_proc_width, guidance_scale=30, num_inference_steps=50,
+                    height=flux_proc_height, width=flux_proc_width, guidance_scale=30, num_inference_steps=num_flux_steps,
                     max_sequence_length=512, generator=generator
                 ).images[0]
-                print("FLUX.1-Fill inpainting complete.")
+                print(f"FLUX.1-Fill inpainting complete with {num_flux_steps} steps.")
                 image_to_be_relit_pil = inpainted_image_flux_sized
 
             except Exception as e:
