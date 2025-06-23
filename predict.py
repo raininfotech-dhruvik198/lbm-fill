@@ -153,9 +153,7 @@ class Predictor(BasePredictor):
         background_prompt: str = Input(description="Text prompt for the background generation."),
         num_sampling_steps: int = Input(
             description="Number of inference steps for LBM model.", default=1, ge=1, le=4
-        ),
-        output_width: int = Input(description="Optional. Desired width for the final output image. If not provided, defaults to original foreground width.", default=None, ge=1),
-        output_height: int = Input(description="Optional. Desired height for the final output image. If not provided, defaults to original foreground height.", default=None, ge=1)
+        )
     ) -> Path:
         """Run relighting prediction with foreground and background images."""
 
@@ -273,18 +271,11 @@ class Predictor(BasePredictor):
         final_output_image_processed = lbm_output_image_pil
         print("LBM output is now set as the final processed image (before final resizing).")
 
-        # Resize to original foreground image dimensions
-        if output_width is not None and output_height is not None:
-            print(f"Resizing final output to user-defined dimensions: {output_width}x{output_height} using resize_and_center_crop.")
-            final_output_image_resized = resize_and_center_crop(final_output_image_processed, output_width, output_height)
-        else:
-            print(f"Resizing final output to original foreground dimensions: {ori_w_fg}x{ori_h_fg} using simple resize.")
-            final_output_image_resized = final_output_image_processed.resize((ori_w_fg, ori_h_fg), Image.LANCZOS)
-
-        # Save the output image
+        # Save the output image without resizing
         out_dir = tempfile.mkdtemp()
         out_path = Path(out_dir) / "output.png"
-        final_output_image_resized.save(out_path)
+        final_output_image_processed.save(out_path)
 
         print(f"Output image saved to: {out_path}")
         return out_path
+        
