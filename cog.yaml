@@ -1,0 +1,5 @@
+build:
+  gpu: true
+  python_version: "3.10"
+  python_requirements: "requirements.txt" # Use requirements.txt for dependencies
+predict: "predict.py:Predictor"
