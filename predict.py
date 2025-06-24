@@ -161,6 +161,8 @@ class Predictor(BasePredictor):
         """Run relighting prediction with foreground and background images."""
 
         fg_image_pil = Image.open(str(foreground_image)).convert("RGB")
+        original_fg_width, original_fg_height = fg_image_pil.size
+        print(f"Original foreground image dimensions: {original_fg_width}x{original_fg_height}")
 
         # Extract original foreground mask once. This will be used for FLUX (inverted)
         # and potentially for fg_mask_processed if any later step needs it.
@@ -274,10 +276,14 @@ class Predictor(BasePredictor):
         final_output_image_processed = lbm_output_image_pil
         print("LBM output is now set as the final processed image (before final resizing).")
 
-        # Save the output image without resizing
+        # Resize final output to original foreground image dimensions
+        print(f"Resizing final output to original dimensions: {original_fg_width}x{original_fg_height}")
+        final_output_image_resized = final_output_image_processed.resize((original_fg_width, original_fg_height), Image.LANCZOS)
+
+        # Save the output image
         out_dir = tempfile.mkdtemp()
         out_path = Path(out_dir) / "output.png"
-        final_output_image_processed.save(out_path)
+        final_output_image_resized.save(out_path)
 
         print(f"Output image saved to: {out_path}")
         return out_path
